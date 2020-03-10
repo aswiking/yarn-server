@@ -1,6 +1,8 @@
 import express from "express";
 import cuid from "cuid";
-import validateYarnSchema from "../schema-validation.js";
+import validateSchema from "../schema-validation.js";
+import yarnSchema from "../schemas/yarn-schema.js";
+
 
 const router = express.Router();
 
@@ -39,7 +41,7 @@ router.get("/api/yarns", (req, res) => {
   res.status(200).json(yarns);
 });
 
-router.post("/api/yarns", validateYarnSchema, (req, res) => {
+router.post("/api/yarns", validateSchema(yarnSchema), (req, res) => {
   const yarn = {
     id: cuid(),
     name: req.validatedBody.name,
@@ -63,15 +65,7 @@ router.delete("/api/yarns/:yarnId", (req, res) => {
   res.status(204).send();
 });
 
-router.put("/api/yarns/:yarnId", (req, res) => {
-  const { value, error } = yarnSchema.validate(req.body);
-  if (error) {
-    throw {
-      status: 400,
-      messages: error.details.map(e => e.message)
-    };
-  }
-
+router.put("/api/yarns/:yarnId", validateSchema(yarnSchema), (req, res) => {
   if (value.id !== undefined && req.params.yarnId !== value.id) {
     throw {
       status: 400,
